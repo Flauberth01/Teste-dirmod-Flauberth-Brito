@@ -282,6 +282,14 @@ export function useRegisterRealtimeValidation(form) {
       return false
     }
 
+    if (cep === '00000000') {
+      clearAddressFields()
+      setFieldLocalError('cep', 'CEP inválido ou inexistente.')
+      asyncFeedback.cep = ''
+
+      return false
+    }
+
     if (fieldStates.cep.asyncChecked && lastCepChecked === cep) {
       return fieldStates.cep.error === ''
     }

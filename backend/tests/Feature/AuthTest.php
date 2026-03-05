@@ -179,3 +179,27 @@ it('allows register as pending when cep api is unavailable', function () {
         ->assertCreated()
         ->assertJsonPath('data.user.address_status', 'pending');
 });
+
+it('blocks register with zeroed cep even when cep api is unavailable', function () {
+    app()->bind(CepService::class, fn () => new class extends CepService
+    {
+        public function lookup(string $cep): array
+        {
+            throw new ExternalServiceUnavailableException(503);
+        }
+    });
+
+    $response = $this->postJson('/api/auth/register', [
+        'name' => 'Ana Silva',
+        'email' => 'ana-zero@example.com',
+        'password' => 'secret123',
+        'password_confirmation' => 'secret123',
+        'cpf' => '52998224725',
+        'cep' => '00000000',
+    ]);
+
+    $response
+        ->assertStatus(422)
+        ->assertJsonPath('code', 'VALIDATION_ERROR')
+        ->assertJsonPath('errors.cep.0', 'CEP inválido ou inexistente.');
+});

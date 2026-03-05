@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { listExpenses } from '../services/expenseService'
+import { normalizeApiError } from '../utils/errorMapper'
 
 const loading = ref(false)
 const alertMessage = ref('')
@@ -33,7 +34,8 @@ async function loadExpenses() {
     const response = await listExpenses()
     expenses.value = response.data?.data ?? []
   } catch (error) {
-    alertMessage.value = error?.message ?? 'Erro ao carregar despesas.'
+    const parsedError = normalizeApiError(error)
+    alertMessage.value = parsedError.displayMessage ?? 'Erro ao carregar despesas.'
   } finally {
     loading.value = false
   }

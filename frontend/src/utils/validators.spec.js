@@ -32,6 +32,19 @@ describe('form validators', () => {
     expect(errors.cep?.[0]).toContain('8 dígitos')
   })
 
+  it('rejects zeroed cep', () => {
+    const errors = validateRegisterForm({
+      name: 'Ana',
+      email: 'ana@example.com',
+      password: 'secret123',
+      password_confirmation: 'secret123',
+      cpf: '52998224725',
+      cep: '00000000',
+    })
+
+    expect(errors.cep?.[0]).toContain('inválido ou inexistente')
+  })
+
   it('validates expense decimal precision', () => {
     const errors = validateExpenseForm({ amount_original: '10.999', currency: 'US' })
 

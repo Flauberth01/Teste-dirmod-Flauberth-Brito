@@ -97,9 +97,19 @@ npm run test:e2e
 - `GET /api/expenses/{id}`
 - `POST /api/expenses/{id}/retry-conversion`
 
+## Regras de CEP
+
+- O CEP `00000000` é considerado inválido e retorna erro de validação.
+- Em indisponibilidade da API externa de CEP, o cadastro só pode seguir como `pending` para CEP sintaticamente válido e diferente de `00000000`.
+
 ## Contrato de erro (fixo)
 
-- `422` -> `{ "message": "Validation error", "errors": { ... }, "code": "VALIDATION_ERROR" }`
-- `401` -> `{ "message": "Unauthenticated", "errors": null, "code": "UNAUTHENTICATED" }`
-- `403` -> `{ "message": "Forbidden", "errors": null, "code": "FORBIDDEN" }`
-- `503/504` -> `{ "message": "External service unavailable", "errors": null, "code": "EXTERNAL_SERVICE_UNAVAILABLE" }`
+- Campos base de erro:
+  - `{ "message": "...", "errors": null|{...}, "code": "...", "status": 000, "request_id": "..." }`
+- `422` -> `code: "VALIDATION_ERROR"`
+- `401` -> `code: "UNAUTHENTICATED"`
+- `403` -> `code: "FORBIDDEN"`
+- `503/504` (serviço externo) -> `code: "EXTERNAL_SERVICE_UNAVAILABLE"`
+- `503` (banco indisponível) -> `code: "DATABASE_UNAVAILABLE"`
+- `500` (falha de escrita no banco) -> `code: "DATABASE_WRITE_ERROR"`
+- `500` (falha interna não mapeada) -> `code: "INTERNAL_ERROR"`

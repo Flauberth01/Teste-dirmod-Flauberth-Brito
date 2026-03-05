@@ -127,7 +127,7 @@ async function onSubmit() {
   } catch (error) {
     const parsedError = normalizeApiError(error)
     fieldErrors.value = parsedError.errors
-    alertMessage.value = parsedError.message
+    alertMessage.value = parsedError.displayMessage
   } finally {
     loading.value = false
   }

@@ -169,6 +169,10 @@ export function validateRegisterField(field, form) {
       return 'CEP deve conter 8 dígitos.'
     }
 
+    if (cep === '00000000') {
+      return 'CEP inválido ou inexistente.'
+    }
+
     return ''
   }
 

@@ -38,6 +38,8 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error?.response?.status
+    const payload = error?.response?.data ?? {}
+    const requestId = payload.request_id ?? error?.response?.headers?.['x-request-id'] ?? null
 
     if (status === 401) {
       const authStore = authStoreGetter()
@@ -45,26 +47,40 @@ apiClient.interceptors.response.use(
       unauthorizedHandler()
 
       return Promise.reject({
-        message: 'Unauthenticated',
-        errors: null,
-        code: 'UNAUTHENTICATED',
+        message: payload.message ?? 'Unauthenticated',
+        errors: payload.errors ?? null,
+        code: payload.code ?? 'UNAUTHENTICATED',
+        status,
+        request_id: requestId,
       })
     }
 
     if (status === 422) {
-      const payload = error?.response?.data ?? {}
-
       return Promise.reject({
         message: payload.message ?? 'Validation error',
-        errors: payload.errors ?? null,
+        errors: payload.errors ?? {},
         code: payload.code ?? 'VALIDATION_ERROR',
+        status,
+        request_id: requestId,
+      })
+    }
+
+    if (status) {
+      return Promise.reject({
+        message: payload.message ?? 'Erro ao processar',
+        errors: payload.errors ?? null,
+        code: payload.code ?? 'GENERIC_ERROR',
+        status,
+        request_id: requestId,
       })
     }
 
     return Promise.reject({
-      message: 'Erro ao processar',
+      message: 'Falha de conexão com o servidor',
       errors: null,
-      code: 'GENERIC_ERROR',
+      code: 'NETWORK_ERROR',
+      status: null,
+      request_id: null,
     })
   },
 )

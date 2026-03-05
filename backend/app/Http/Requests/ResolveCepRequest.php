@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ValidCep;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ResolveCepRequest extends FormRequest
@@ -21,7 +22,7 @@ class ResolveCepRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'cep' => ['required', 'string', 'regex:/^\d{8}$/'],
+            'cep' => ['required', 'string', new ValidCep()],
         ];
     }
 }

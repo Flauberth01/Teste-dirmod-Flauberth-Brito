@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { getExpense, retryExpenseConversion } from '../services/expenseService'
+import { normalizeApiError } from '../utils/errorMapper'
 
 const route = useRoute()
 
@@ -31,7 +32,8 @@ async function loadExpense() {
     const response = await getExpense(route.params.id)
     expense.value = response.data?.data ?? null
   } catch (error) {
-    alertMessage.value = error?.message ?? 'Erro ao carregar despesa.'
+    const parsedError = normalizeApiError(error)
+    alertMessage.value = parsedError.displayMessage ?? 'Erro ao carregar despesa.'
   } finally {
     loading.value = false
   }
@@ -51,7 +53,8 @@ async function retryConversion() {
     expense.value = response.data?.data ?? expense.value
     infoMessage.value = 'Conversão reprocessada com sucesso.'
   } catch (error) {
-    alertMessage.value = error?.message ?? 'Erro ao reprocessar conversão.'
+    const parsedError = normalizeApiError(error)
+    alertMessage.value = parsedError.displayMessage ?? 'Erro ao reprocessar conversão.'
   } finally {
     retrying.value = false
   }

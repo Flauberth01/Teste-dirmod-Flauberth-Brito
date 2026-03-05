@@ -8,6 +8,21 @@ use Illuminate\Validation\ValidationException;
 
 class DatabaseQueryExceptionMapper
 {
+    public static function isConnectionIssue(QueryException $exception): bool
+    {
+        $sqlState = self::sqlState($exception);
+
+        if ($sqlState === null) {
+            return false;
+        }
+
+        if (str_starts_with($sqlState, '08')) {
+            return true;
+        }
+
+        return in_array($sqlState, ['57P01', '57P02', '57P03'], true);
+    }
+
     public static function isUniqueViolation(QueryException $exception): bool
     {
         return self::sqlState($exception) === '23505';

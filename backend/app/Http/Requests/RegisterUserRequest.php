@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ValidCep;
 use App\Rules\ValidCpf;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -28,7 +29,7 @@ class RegisterUserRequest extends FormRequest
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'cpf' => ['required', 'string', 'size:11', 'unique:users,cpf', new ValidCpf()],
-            'cep' => ['required', 'string', 'regex:/^\d{8}$/'],
+            'cep' => ['required', 'string', new ValidCep()],
         ];
     }
 
@@ -46,7 +47,6 @@ class RegisterUserRequest extends FormRequest
             'cpf.size' => 'CPF deve conter 11 dígitos.',
             'cpf.unique' => 'Este CPF já está cadastrado.',
             'cep.required' => 'CEP é obrigatório.',
-            'cep.regex' => 'CEP deve conter 8 dígitos.',
         ];
     }
 }

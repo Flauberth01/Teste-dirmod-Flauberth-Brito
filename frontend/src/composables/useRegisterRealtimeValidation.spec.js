@@ -196,4 +196,42 @@ describe('useRegisterRealtimeValidation', () => {
     expect(canSubmit).toBe(false)
     expect(validation.fieldErrors.value.cpf?.[0]).toContain('já está cadastrado')
   })
+
+  it('does not lookup zeroed cep and blocks submit', async () => {
+    checkCpfAvailabilityMock.mockResolvedValue({
+      data: {
+        data: {
+          cpf: '52998224725',
+          valid: true,
+          available: true,
+          reason: null,
+        },
+      },
+    })
+
+    const form = createForm()
+    const validation = useRegisterRealtimeValidation(form)
+
+    form.name = 'Ana'
+    form.email = 'ana@example.com'
+    form.password = 'secret123'
+    form.password_confirmation = 'secret123'
+    form.cpf = '52998224725'
+    form.cep = '00000000'
+
+    validation.onCpfInput()
+    validation.onCepInput()
+
+    await vi.advanceTimersByTimeAsync(350)
+    await Promise.resolve()
+
+    expect(lookupCepMock).not.toHaveBeenCalled()
+
+    const canSubmit = await validation.validateBeforeSubmit()
+
+    expect(canSubmit).toBe(false)
+    expect(lookupCepMock).not.toHaveBeenCalled()
+    expect(validation.fieldErrors.value.cep?.[0]).toBe('CEP inválido ou inexistente.')
+    expect(validation.canShowSubmitButton.value).toBe(false)
+  })
 })

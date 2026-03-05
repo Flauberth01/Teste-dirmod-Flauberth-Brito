@@ -71,7 +71,7 @@ async function onSubmit() {
   } catch (error) {
     const parsedError = normalizeApiError(error)
     applyServerErrors(parsedError.errors)
-    alertMessage.value = Object.keys(parsedError.errors).length === 0 ? parsedError.message : ''
+    alertMessage.value = Object.keys(parsedError.errors).length === 0 ? parsedError.displayMessage : ''
   } finally {
     loading.value = false
   }

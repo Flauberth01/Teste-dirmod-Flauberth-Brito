@@ -15,6 +15,10 @@ class CepService
         $baseUrl = rtrim((string) config('services.cep.url', 'https://viacep.com.br/ws'), '/');
         $normalizedCep = preg_replace('/\D/', '', $cep);
 
+        if ($normalizedCep === '00000000') {
+            throw new InvalidCepException();
+        }
+
         try {
             $response = Http::timeout(6)
                 ->retry(2, 250)

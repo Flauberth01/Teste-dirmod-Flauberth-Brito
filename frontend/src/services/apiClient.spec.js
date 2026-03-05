@@ -28,37 +28,52 @@ describe('apiClient interceptors', () => {
       message: 'Validation error',
       errors: { email: ['E-mail obrigatório'] },
       code: 'VALIDATION_ERROR',
+      request_id: 'req-422',
     })
 
     await expect(apiClient.post('/validation')).rejects.toEqual({
       message: 'Validation error',
       errors: { email: ['E-mail obrigatório'] },
       code: 'VALIDATION_ERROR',
+      status: 422,
+      request_id: 'req-422',
     })
   })
 
   it('clears session and redirects on 401', async () => {
-    mock.onGet('/protected').reply(401)
+    mock.onGet('/protected').reply(401, {
+      message: 'Unauthenticated',
+      errors: null,
+      code: 'UNAUTHENTICATED',
+      request_id: 'req-401',
+    })
 
     await expect(apiClient.get('/protected')).rejects.toEqual({
       message: 'Unauthenticated',
       errors: null,
       code: 'UNAUTHENTICATED',
+      status: 401,
+      request_id: 'req-401',
     })
 
     expect(authStore.clearSession).toHaveBeenCalledTimes(1)
     expect(redirectSpy).toHaveBeenCalledTimes(1)
   })
 
-  it('normalizes generic errors', async () => {
+  it('preserves backend payload for non-401/422 errors', async () => {
     mock.onGet('/boom').reply(500, {
-      message: 'Internal server error',
+      message: 'Database unavailable',
+      errors: null,
+      code: 'DATABASE_UNAVAILABLE',
+      request_id: 'req-500',
     })
 
     await expect(apiClient.get('/boom')).rejects.toEqual({
-      message: 'Erro ao processar',
+      message: 'Database unavailable',
       errors: null,
-      code: 'GENERIC_ERROR',
+      code: 'DATABASE_UNAVAILABLE',
+      status: 500,
+      request_id: 'req-500',
     })
   })
 })

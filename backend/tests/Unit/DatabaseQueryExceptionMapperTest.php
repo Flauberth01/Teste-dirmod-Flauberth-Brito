@@ -56,3 +56,21 @@ it('maps non unique query exception to database write exception', function () {
         DatabaseQueryExceptionMapper::throwValidationOrDatabaseException($exception, []);
     })->toThrow(DatabaseWriteException::class);
 });
+
+it('classifies connection issues by sqlstate class 08', function () {
+    $exception = makeQueryException(
+        '08006',
+        'SQLSTATE[08006]: connection failure'
+    );
+
+    expect(DatabaseQueryExceptionMapper::isConnectionIssue($exception))->toBeTrue();
+});
+
+it('does not classify non-connection sqlstate as connection issue', function () {
+    $exception = makeQueryException(
+        '23505',
+        'SQLSTATE[23505]: duplicate key value violates unique constraint "users_email_unique"'
+    );
+
+    expect(DatabaseQueryExceptionMapper::isConnectionIssue($exception))->toBeFalse();
+});
